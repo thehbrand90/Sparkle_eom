@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff7f1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="엄마가 준비하고 채원이·주원이가 해내는, 우리 가족의 작은 성장 기록장">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="반짝하루">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>채원이·주원이네 반짝하루 🌷</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🌷%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">본문으로 바로 가기</a>
+
+<aside>
+  <a class="brand" href="#home">🌷 <span>반짝하루<small>CHAEWON &amp; JUWON'S LITTLE WORLD</small></span></a>
+  <p class="side-label">우리 가족의 작은 기록</p>
+  <nav id="nav" aria-label="가족 기록장 메뉴"></nav>
+  <div class="side-bottom">
+    <div class="mini-rainbow" aria-hidden="true">🌈</div>
+    <b>함께라서 더 반짝여요</b>
+    <p class="side-quote">작은 하루가 모여<br>소중한 추억이 돼요.</p>
+    <button class="text-button" type="button" onclick="go('settings')">⚙ 저장 · 가족 설정</button>
+  </div>
+</aside>
+
+<div class="shell">
+  <header>
+    <span class="breadcrumb">우리 가족의 행복 아지트 <i aria-hidden="true">✦</i></span>
+    <div class="header-right">
+      <span id="saved">● 이 기기에 자동 저장</span>
+      <div class="role-wrap">
+        <button id="roleControl" class="role-control" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="roleMenu" onclick="toggleRoleMenu(event)">🌷 엄마 화면 ▾</button>
+        <div id="roleMenu" class="role-menu" hidden></div>
+      </div>
+      <button class="icon-button" type="button" onclick="go('settings')" aria-label="설정">⚙</button>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1"></main>
+
+  <footer>채원공주와 주원이, 엄마, 아빠의 소중한 하루를 담아요. ♡</footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"><span id="toastText"></span><button id="toastAction" type="button" hidden></button></div>
+
+<dialog id="dialog" aria-labelledby="dialogTitle">
+  <form id="dialogForm">
+    <button type="button" class="close" id="dialogClose" aria-label="닫기">×</button>
+    <h2 id="dialogTitle"></h2>
+    <div id="dialogBody"></div>
+    <div id="dialogFields"></div>
+    <div class="dialog-actions">
+      <button type="button" class="secondary" id="dialogCancel">취소</button>
+      <button type="submit" class="primary" id="dialogSubmit">저장하기 ♡</button>
+    </div>
+  </form>
+</dialog>
+
+<input type="file" id="photoInput" accept="image/*" hidden>
+<input type="file" id="importInput" accept="application/json,.json" hidden>
+
+<noscript><p style="padding:24px;text-align:center">반짝하루를 보려면 브라우저의 자바스크립트를 켜 주세요.</p></noscript>
+<script src="app.js"></script>
+</body>
+</html>
