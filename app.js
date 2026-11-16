@@ -15,8 +15,8 @@ const SEOUL = 'Asia/Seoul';
 /* 실시간 가족 공유 (Supabase). 아래 세 값을 채우면 모든 휴대폰이 같은 기록을 봐요.
    비워두면 이 기기의 브라우저(localStorage)에만 저장돼요. 설정 화면에서도 넣을 수 있어요. */
 const SYNC_CONFIG = {
-  supabaseUrl: '',
-  supabaseAnonKey: '',
+  supabaseUrl: 'https://exdhgwkudejynccxqdhm.supabase.co',
+  supabaseAnonKey: 'sb_publishable_hjshLIBPkJb7Sqjjhw2FPw_44Mbr_95',
   familyId: 'chaewon-family'
 };
 const SYNC_OVERRIDE_KEY = 'chaewon-sparkle-sync';
@@ -392,11 +392,15 @@ function savePrefs() {
 function saveLocal() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    storageWorks = true;
     return true;
   } catch (err) {
     storageWorks = false;
-    setSaved('○ 저장 공간 부족 · 백업 필요', 'error');
-    toast('저장 공간이 부족해요. 설정에서 백업해 주세요.');
+    const quota = !!(err && (err.name === 'QuotaExceededError' || err.code === 22));
+    setSaved(quota ? '○ 저장 공간 부족 · 백업 필요' : '○ 자동 저장을 쓸 수 없어요', 'error', quota ? '○ 공간 부족' : '○ 저장 불가');
+    toast(quota
+      ? '저장 공간이 부족해요. 설정에서 백업해 주세요.'
+      : '이 브라우저에서는 자동 저장이 안 돼요. 설정에서 백업해 주세요.');
     return false;
   }
 }
@@ -406,17 +410,24 @@ function save() {
   const ok = saveLocal();
   if (!ok) return;
   if (sync.cfg.enabled) {
-    setSaved('● 실시간 가족 공유 중', 'live');
+    setSaved('● 실시간 가족 공유 중', 'live', '● 실시간 공유');
     schedulePush();
   } else {
-    setSaved('● 이 기기에 자동 저장', 'local');
+    setSaved('● 이 기기에 자동 저장', 'local', '● 기기 저장');
   }
 }
 
-function setSaved(msg, kind) {
+function setSaved(msg, kind, shortMsg) {
   const el = $('#saved');
   if (!el) return;
-  el.textContent = msg;
+  const long = el.querySelector('.saved-long');
+  const short = el.querySelector('.saved-short');
+  if (long && short) {
+    long.textContent = msg;
+    short.textContent = shortMsg || msg;
+  } else {
+    el.textContent = msg;
+  }
   el.title = msg;
   el.className = kind === 'error' ? 'error' : (kind === 'local' ? 'offline' : '');
   el.setAttribute('data-kind', kind || 'live');
@@ -472,13 +483,13 @@ async function syncCall(path, init) {
 
 function syncError(err) {
   sync.lastError = err && err.message ? err.message : '연결하지 못했어요';
-  setSaved('○ 연결 끊김 · 기기에 저장', 'error');
+  setSaved('○ 연결 끊김 · 기기에 저장', 'error', '○ 연결 끊김');
 }
 
 function syncOk() {
   sync.lastError = '';
   sync.lastOkAt = Date.now();
-  setSaved('● 실시간 가족 공유 중', 'live');
+  setSaved('● 실시간 가족 공유 중', 'live', '● 실시간 공유');
 }
 
 const isTyping = () => {
@@ -552,10 +563,11 @@ function syncStart() {
   sync.pollTimer = null;
   sync.remoteAt = '';
   if (!sync.cfg.enabled) {
-    if (storageWorks) setSaved('● 이 기기에 자동 저장', 'local');
+    if (storageWorks) setSaved('● 이 기기에 자동 저장', 'local', '● 기기 저장');
+    else setSaved('○ 자동 저장을 쓸 수 없어요', 'error', '○ 저장 불가');
     return;
   }
-  setSaved('● 실시간 가족 공유 중', 'live');
+  setSaved('● 실시간 가족 공유 중', 'live', '● 실시간 공유');
   syncPull({ force: true });
   sync.pollTimer = setInterval(() => { syncPull(); }, SYNC_POLL_MS);
 }
@@ -589,7 +601,7 @@ function saveSyncConfig(event) {
   }
   try {
     if (cfg.supabaseUrl) localStorage.setItem(SYNC_OVERRIDE_KEY, JSON.stringify(cfg));
-    else localStorage.removeItem(SYNC_OVERRIDE_KEY);
+    else saveSyncOff();
   } catch (err) {
     toast('이 브라우저에서는 설정을 저장할 수 없어요.');
     return;
@@ -600,8 +612,17 @@ function saveSyncConfig(event) {
   if (cfg.supabaseUrl) syncNow(false);
 }
 
+/** 이 기기에서만 저장하도록 끄기. 기본 값이 들어 있어도 꺼지도록 빈 설정을 남겨요. */
+function saveSyncOff() {
+  localStorage.setItem(SYNC_OVERRIDE_KEY, JSON.stringify({
+    supabaseUrl: '',
+    supabaseAnonKey: '',
+    familyId: SYNC_CONFIG.familyId
+  }));
+}
+
 function clearSyncConfig() {
-  try { localStorage.removeItem(SYNC_OVERRIDE_KEY); } catch (err) { /* 무시 */ }
+  try { saveSyncOff(); } catch (err) { /* 무시 */ }
   syncStart();
   render();
   toast('가족 공유를 껐어요. 이 기기에만 저장돼요.');
@@ -1259,12 +1280,12 @@ function money() {
       </section>
       <section class="panel" style="margin-top:18px">
         <h2>🧾 용돈 발자국</h2>
-        <p class="sub">잘못 적은 기록은 × 로 지울 수 있어요.</p>
+        <p class="sub">${isKidView() ? '기록은 이 기기에 차곡차곡 쌓여요.' : '잘못 적은 기록은 × 로 지울 수 있어요.'}</p>
         ${rows.map(entry => `<div class="log-row">
           <span aria-hidden="true">${entry.amount > 0 ? '🪙' : '🛍️'}</span>
           <div class="log-text"><p>${esc(entry.title)}</p><small>${esc(shortDate(entry.date))}</small></div>
           <b class="amount ${entry.amount > 0 ? 'plus' : 'minus'}">${entry.amount > 0 ? '+' : '−'}${Math.abs(entry.amount).toLocaleString()}원</b>
-          <button type="button" class="row-del" onclick="confirmRemoveTransaction('${kid.id}','${entry.id}')" aria-label="이 기록 지우기">×</button>
+          ${isKidView() ? '' : `<button type="button" class="row-del" onclick="confirmRemoveTransaction('${kid.id}','${entry.id}')" aria-label="이 기록 지우기">×</button>`}
         </div>`).join('') || '<div class="empty">첫 번째 반짝 용돈을 기다려요 🐷<br><br>공부를 마치거나 받은 용돈을 적어보세요.</div>'}
       </section>`;
 }
@@ -1367,7 +1388,7 @@ function chat() {
       <section class="panel">
         <div class="chat" id="chatMessages">${list || `<div class="empty" style="padding:55px 10px"><div style="font-size:42px">💌</div><p>첫 쪽지를 남겨볼까요?</p>“오늘도 많이 사랑해!”</div>`}</div>
         <form class="chat-compose" onsubmit="sendMessage(event)">
-          <select name="person" aria-label="보내는 가족">${state.people.map(person => `<option value="${person.id}" ${person.id === me.id ? 'selected' : ''}>${esc(person.name)}</option>`).join('')}</select>
+          ${isKidView() ? '' : `<select name="person" aria-label="보내는 가족">${state.people.map(person => `<option value="${person.id}" ${person.id === me.id ? 'selected' : ''}>${esc(person.name)}</option>`).join('')}</select>`}
           <input name="message" maxlength="500" required placeholder="다정한 마음을 적어주세요" aria-label="쪽지 내용" autocomplete="off">
           <button class="primary" type="submit">보내기 ♡</button>
         </form>
@@ -1663,7 +1684,8 @@ function confirmRemoveMember(id) {
   const stamps = stampsOf(id).length;
   openForm({
     title: '가족 목록에서 뺄까요?',
-    body: `<p><b>${esc(person.name)}</b>${person.role === 'kid' ? '의 도장 ' + stamps + '개와' : ''} 할 일 ${tasks.length}개, 쪽지 ${messages}개, 응원 ${cheers}개${person.role === 'kid' ? ', 용돈 기록' : ''}이 함께 정리돼요.</p>
+    body: `<p><b>${esc(person.name)}</b> 가족을 목록에서 뺄까요?</p>
+      <p class="sub">함께 정리돼요 — ${person.role === 'kid' ? '도장 ' + stamps + '개 · ' : ''}할 일 ${tasks.length}개 · 쪽지 ${messages}개 · 응원 ${cheers}개${person.role === 'kid' ? ' · 용돈 기록' : ''}</p>
       <p class="sub">되돌릴 수 없으니 필요하면 먼저 백업해 주세요.</p>`,
     submitLabel: '가족에서 빼기',
     danger: true,
@@ -1817,7 +1839,7 @@ function openForm(options) {
     if (options.onSubmit(data) !== false) closeDialog();
   };
   if (!dialog.open) dialog.showModal();
-  const first = $('#dialogFields').querySelector('input,select,textarea');
+  const first = $('#dialogFields').querySelector('input,select,textarea') || $('#dialogCancel');
   if (first) setTimeout(() => { try { first.focus(); } catch (err) { /* 무시 */ } }, 40);
 }
 

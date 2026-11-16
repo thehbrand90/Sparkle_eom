@@ -89,6 +89,7 @@ header{
   overflow:hidden;text-overflow:ellipsis;
 }
 #saved.offline{color:#b58e6d}
+.saved-short{display:none}
 #saved.error{color:#c08080}
 .icon-button{background:#f6efe8;width:34px;height:34px;border-radius:50%;font-size:18px;display:grid;place-items:center}
 .icon-button:hover{background:#f1e6dc}
@@ -191,13 +192,13 @@ footer{text-align:center;font-size:10px;color:#bcada3;padding:28px 15px 34px}
 .cheer-note .cheer-heart{font-size:26px;line-height:1.1}
 .cheer-note small{font-size:10px;color:#bc8e9b;font-weight:700}
 .cheer-note p{font-size:15px;line-height:1.7;margin:5px 0 0;white-space:pre-wrap}
-.cheer-compose{display:flex;gap:10px;align-items:stretch;margin-top:15px}
+.cheer-compose{display:flex;gap:10px;align-items:flex-end;margin-top:15px}
 .cheer-compose textarea{
   font:inherit;padding:12px 14px;border:1px solid #ebd6df;background:#fffdfc;
   border-radius:13px;resize:vertical;flex:1;min-width:0;line-height:1.7;font-size:13px;
 }
 .cheer-compose textarea:focus{outline:2px solid #ebb9ca}
-.cheer-compose button{white-space:nowrap;font-size:12px}
+.cheer-compose button{white-space:nowrap;font-size:12px;padding:13px 18px}
 .cheer-quick{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .cheer-quick button{
   background:#fff8fb;border:1px solid #eedce4;border-radius:15px;
@@ -248,7 +249,7 @@ footer{text-align:center;font-size:10px;color:#bcada3;padding:28px 15px 34px}
 .week{display:flex;justify-content:space-between;gap:6px;margin:20px 0}
 .day{text-align:center;font-size:10px;color:#a4978d;flex:1}
 .stamp{
-  margin:9px auto 0;aspect-ratio:1;width:100%;max-width:44px;border:1.5px dashed #e4dbce;
+  margin:9px auto 0;width:44px;height:44px;border:1.5px dashed #e4dbce;
   border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;background:#fffcf8;
 }
 .stamp.done{background:#f9e5eb;border:1px solid #e9b5c4}
@@ -262,7 +263,7 @@ footer{text-align:center;font-size:10px;color:#bcada3;padding:28px 15px 34px}
 .mission-emoji{font-size:34px;line-height:1}
 .mission-body h3{font-size:16px;margin:0 0 7px}
 .mission-body p{font-size:11px;color:#a19484;line-height:1.5}
-.actions .primary{flex:1}
+.mission .actions .primary{flex:1}
 .actions .secondary{font-size:18px;padding:10px 14px}
 
 /* ---------------- 아이 선택 ---------------- */
@@ -359,7 +360,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid #edb6c6;outline-offset
 /* ---------------- 도장판(달력) ---------------- */
 .cal-nav{display:flex;align-items:center;gap:10px}
 .cal-nav h2{min-width:118px;text-align:center;font-size:17px}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;text-align:center}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;text-align:center;max-width:680px;margin:0 auto}
 .cal>div{padding:10px 2px;border-radius:11px;font-size:12px}
 .cal .dow{color:#af9e91;font-size:11px;padding:4px}
 .cal .cal-day{color:#b3a49a;background:#fdfaf6}
@@ -368,7 +369,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid #edb6c6;outline-offset
 .cal .cal-day.has .flower-ico{color:inherit}
 .cal .cal-day.today{box-shadow:inset 0 0 0 2px #f1c9d6}
 .cal .cal-day.blank{background:none}
-.cal-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#a29186;margin-top:14px}
+.cal-legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font-size:11px;color:#a29186;margin-top:14px}
 
 /* ---------------- 설정 ---------------- */
 .settings-grid{display:grid;gap:18px}
@@ -470,6 +471,8 @@ dialog h2{font-size:19px;margin:0 0 6px;padding-right:24px}
   .header-right{gap:8px;flex:1;justify-content:flex-end}
   .role-control{font-size:10.5px;padding:8px 10px}
   #saved{font-size:9.5px;max-width:104px}
+  #saved .saved-long{display:none}
+  #saved .saved-short{display:inline}
   .icon-button{width:30px;height:30px;font-size:16px}
   .role-menu{width:238px;right:-2px}
 
@@ -515,7 +518,7 @@ dialog h2{font-size:19px;margin:0 0 6px;padding-right:24px}
 
   .grid-two{grid-template-columns:1fr;gap:14px;margin-top:16px}
   .week{margin:16px 0}
-  .week .stamp{max-width:38px}
+  .week .stamp{width:38px;height:38px}
 
   .kid-switch{width:100%;justify-content:stretch}
   .kid-switch button{flex:1;justify-content:center}
